@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { formatDateWithValidation } from '../lib/dateUtils'
 
 interface Maintenance {
@@ -17,12 +17,33 @@ interface Maintenance {
 interface MaintenanceAccordionProps {
   title: string
   maintenances: Maintenance[]
+  searchTerm?: string
 }
 
-export default function MaintenanceAccordion({ title, maintenances }: MaintenanceAccordionProps) {
+export default function MaintenanceAccordion({ title, maintenances, searchTerm = '' }: MaintenanceAccordionProps) {
   const [isOpen, setIsOpen] = useState(false)
 
-  if (maintenances.length === 0) {
+  // Simple substring search function with null checks
+  const matchesSearch = (text: string): boolean => {
+    if (!searchTerm) return true
+    if (!text) return false
+    return text.toLowerCase().includes(searchTerm.toLowerCase())
+  }
+
+  // Filter maintenances based on search term
+  const filteredMaintenances = maintenances.filter(maintenance =>
+    matchesSearch(maintenance.name)
+  )
+
+  // Automatically open accordion if there are matching maintenances
+  useEffect(() => {
+    if (searchTerm && filteredMaintenances.length > 0) {
+      setIsOpen(true)
+    }
+  }, [searchTerm, filteredMaintenances.length])
+
+  // Hide accordion if no maintenances match the filters
+  if (filteredMaintenances.length === 0) {
     return null
   }
 
@@ -40,7 +61,7 @@ export default function MaintenanceAccordion({ title, maintenances }: Maintenanc
 
       {isOpen && (
         <div className="px-4 pb-4">
-          {maintenances.map((maintenance) => (
+          {filteredMaintenances.map((maintenance) => (
             <div key={maintenance.id} className="border-t border-gray-100 pt-4 mb-4">
               <div className="flex justify-between items-start mb-2">
                 <h4 className="font-medium text-gray-800 dark:text-gray-200">{maintenance.name}</h4>

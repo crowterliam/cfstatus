@@ -362,10 +362,12 @@ export default function CloudflareStatusPage() {
             <MaintenanceAccordion
               title={`Active Maintenance (${activeMaintenance.length})`}
               maintenances={activeMaintenance}
+              searchTerm={searchTerm}
             />
             <MaintenanceAccordion
               title={`Upcoming Maintenance (${upcomingMaintenance.length})`}
               maintenances={upcomingMaintenance}
+              searchTerm={searchTerm}
             />
           </div>
         )}
