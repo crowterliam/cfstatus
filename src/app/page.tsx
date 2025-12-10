@@ -103,6 +103,7 @@ export default function CloudflareStatusPage() {
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [showOnlyIssues, setShowOnlyIssues] = useState(false)
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
 
   // Simple search function with null checks
   const matchesSearch = (componentName: string): boolean => {
@@ -212,7 +213,10 @@ export default function CloudflareStatusPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true)
+        // Only show loading state on initial load
+        if (isInitialLoad) {
+          setLoading(true)
+        }
         setError(null)
 
         // Fetch status data
@@ -246,11 +250,19 @@ export default function CloudflareStatusPage() {
         setIncidentsData(incidentsData)
         setUpcomingMaintenance(upcomingMaintenanceData.scheduled_maintenances || [])
         setActiveMaintenance(activeMaintenanceData.scheduled_maintenances || [])
+        
+        // Mark initial load as complete
+        if (isInitialLoad) {
+          setIsInitialLoad(false)
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch status data')
         console.error('Error fetching status data:', err)
       } finally {
-        setLoading(false)
+        // Only clear loading state on initial load
+        if (isInitialLoad) {
+          setLoading(false)
+        }
       }
     }
 
@@ -259,7 +271,7 @@ export default function CloudflareStatusPage() {
     // Refresh data every 60 seconds
     const interval = setInterval(fetchData, 60000)
     return () => clearInterval(interval)
-  }, [])
+  }, [isInitialLoad])
 
   const handleQuickFilter = (filter: string) => {
     setSearchTerm(filter)
